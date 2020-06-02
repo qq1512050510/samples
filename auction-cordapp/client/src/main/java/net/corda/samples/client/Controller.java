@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -71,11 +72,12 @@ public class Controller {
     @PostMapping("create")
     public APIResponse<Void> createAuction(@RequestBody Forms.CreateAuctionForm auctionForm){
         try {
+            List<StateAndRef<AuctionState>> auctionList = activeParty.vaultQuery(AuctionState.class).getStates();
             activeParty.startFlowDynamic(CreateAuctionFlow.Initiator.class,
                     Amount.parseCurrency(auctionForm.getBasePrice() + " USD"),
                     UUID.fromString(auctionForm.getAssetId()),
                     LocalDateTime.parse(auctionForm.getDeadline(),
-                            DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss a"))).getReturnValue().get();
+                            DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss a", Locale.ENGLISH)),false,auctionList).getReturnValue().get();
             return APIResponse.success();
         }catch (ExecutionException e){
             if(e.getCause() != null && e.getCause().getClass().equals(TransactionVerificationException.ContractRejection.class)){

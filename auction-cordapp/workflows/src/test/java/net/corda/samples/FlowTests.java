@@ -72,7 +72,7 @@ public class FlowTests {
         SignedTransaction signedTransaction = future.get();
         Asset asset = (Asset) signedTransaction.getTx().getOutput(0);
         CreateAuctionFlow.Initiator auctionFlow = new CreateAuctionFlow.Initiator(Amount.parseCurrency("1000 USD"),
-                asset.getLinearId().getId(), LocalDateTime.ofInstant(Instant.now().plusMillis(30000), ZoneId.systemDefault()));
+                asset.getLinearId().getId(), LocalDateTime.ofInstant(Instant.now().plusMillis(30000), ZoneId.systemDefault()),false,null);
         CordaFuture<SignedTransaction> future1 = a.startFlow(auctionFlow);
         network.runNetwork();
         SignedTransaction transaction = future1.get();

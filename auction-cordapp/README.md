@@ -18,13 +18,13 @@ could be scheduled to be made inactive, once the auction deadline is reached.
 - `AssetContract`: It is used to govern the evolution of the asset. In this case mostly change of 
 ownership. Left black for simplicity. Has two commands, `CreateAsset` and `TransferAsset`.
 - `AuctionContract`: It governs the evolution of the auction. The has the following commands:
-    - `CreateAuction`: Validation rules governing the creation of the auction. 
-    - `Bid`: Validation rules governing the bidding process of the auction.
-    - `EndAuction`: Validation rules governing end of the auction i.e making the auction inactive
-    once the auction bidding deadline has been reached.
-    - `Settlement`: Validation rules for settlement of the auction i.e. transfer of asset to the 
-    highest bidder and the highest bid amount transfer to the auctioneer.
-    - `Exit`: Rules governing the exit (consumption/deletion) of the auction state.
+              - `CreateAuction`: Validation rules governing the creation of the auction. 
+              - `Bid`: Validation rules governing the bidding process of the auction.
+              - `EndAuction`: Validation rules governing end of the auction i.e making the auction inactive
+              once the auction bidding deadline has been reached.
+              - `Settlement`: Validation rules for settlement of the auction i.e. transfer of asset to the 
+              highest bidder and the highest bid amount transfer to the auctioneer.
+              - `Exit`: Rules governing the exit (consumption/deletion) of the auction state.
 
 ### Flows:
 - `CreateAssetFlow`: This flow is used create an asset.

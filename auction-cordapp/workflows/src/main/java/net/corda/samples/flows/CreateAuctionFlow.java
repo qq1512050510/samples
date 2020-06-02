@@ -1,10 +1,7 @@
 package net.corda.samples.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
-import net.corda.core.contracts.Amount;
-import net.corda.core.contracts.LinearPointer;
-import net.corda.core.contracts.LinearState;
-import net.corda.core.contracts.UniqueIdentifier;
+import net.corda.core.contracts.*;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
@@ -39,6 +36,9 @@ public class CreateAuctionFlow {
         private final UUID auctionItem;
         private final LocalDateTime bidDeadLine;
 
+        private boolean doubleDetection = true;
+        private List<StateAndRef<AuctionState>> auctionList;
+
         /**
          * Constructor to initialise flow parameters received from rpc.
          *
@@ -46,10 +46,12 @@ public class CreateAuctionFlow {
          * @param auctionItem is the uuid of the asset to be put on auction
          * @param bidDeadLine is the time till when the auction will be active
          */
-        public Initiator(Amount<Currency> basePrice, UUID auctionItem, LocalDateTime bidDeadLine) {
+        public Initiator(Amount<Currency> basePrice, UUID auctionItem, LocalDateTime bidDeadLine,boolean doubleDetection,List<StateAndRef<AuctionState>> auctionList) {
             this.basePrice = basePrice;
             this.auctionItem = auctionItem;
             this.bidDeadLine = bidDeadLine;
+            this.doubleDetection = doubleDetection;
+            this.auctionList = auctionList;
         }
 
         @Override
@@ -71,6 +73,30 @@ public class CreateAuctionFlow {
                     .collect(Collectors.toList());
             bidders.remove(auctioneer);
             bidders.remove(notary);
+
+            // double Spending
+            //TODO:Update
+            getLogger().info("------------------------------------------");
+            if(doubleDetection) {
+                /*List<StateAndRef<AuctionState>> auntionStateAndRefs = getServiceHub().getVaultService()
+                        .queryBy(AuctionState.class).getStates();*/
+                auctionList.stream().forEach(stateAndRef -> {
+                    AuctionState auctionState = stateAndRef.getState().getData();
+                    if(auctionState.getAuctionItem().getPointer().getId().equals(auctionItem)){
+                        //throw new FlowException("Asset has bean Auctioned!");
+                        throw new IllegalArgumentException("Asset has bean Auctioned!");
+                    }
+                });
+                /*auctionList.stream().filter(stateAndRef -> {
+                    AuctionState auctionState = stateAndRef.getState().getData();
+                    getLogger().info("------------------------------------------");
+                    System.out.println(auctionItem+":"+auctionState.getAuctionItem().getPointer().getId());
+                    getLogger().info(auctionItem+"&:--------------:&"+auctionState.getAuctionItem().getPointer().getId());
+                    getLogger().info("------------------------------------------");
+                    return !auctionState.getAuctionItem().getPointer().getId().equals(auctionItem);
+                }).findAny().orElseThrow(() -> new FlowException("Asset has bean Auctioned!"));*/
+            }
+
 
             // Create the output state. Use a linear pointer to point to the asset on auction. The asset would be added
             // as a reference state to the transaction and hence we won't spend it.
